@@ -1,0 +1,10 @@
+mongodb+srv://Authur:Authur200614!@zutrad-dashboard.jd5fm3j.mongodb.net/?appName=Zutrad-Dashboard
+145.241.188.127
+
+chmod 400 "C:/Users/lewin/Documents/Work/ssh-key-2026-07-02.key"
+ssh -i C:/Users/lewin/Documents/Work/ssh-key-2026-07-02.key ubuntu@145.241.188.127
+
+cd ~
+git clone https://github.com/lAuthurl/Zutrad-Dashboard.git zutrad-backend
+cd zutrad-backend
+npm install
