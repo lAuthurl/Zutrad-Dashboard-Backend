@@ -77,7 +77,7 @@ export const requireAnyPermission = (permissions) => (req, res, next) => {
 
 // ── requireAdmin ────────────────────────────────────────────────────
 // Run AFTER verifyToken. Blocks anyone who isn't "administrator" or
-// "superadmin" — these are the actual role strings used across the
+// "superadmin" -these are the actual role strings used across the
 // app (see ROLES in useSignup.js and the role checks in the admin
 // page hooks). Use this on routes that manage other users (approving
 // signups, rejecting requests, viewing pending lists, etc).
@@ -89,7 +89,7 @@ export const requireAdmin = (req, res, next) => {
 };
 
 // ── requireSuperAdmin ───────────────────────────────────────────────
-// Run AFTER verifyToken. Stricter than requireAdmin — only lets
+// Run AFTER verifyToken. Stricter than requireAdmin -only lets
 // superadmin through. Useful for actions like changing roles or
 // deleting other admins.
 export const requireSuperAdmin = (req, res, next) => {

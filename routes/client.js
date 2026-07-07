@@ -61,7 +61,7 @@ const resolveClientDocument = async (input) => {
   });
 };
 
-// GET /clients — list all clients
+// GET /clients -list all clients
 router.get("/", async (req, res) => {
   try {
     const clients = await Client.find().sort({ createdAt: -1 });
@@ -71,7 +71,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /clients/:id — fetch one client by id, numeric index or company name
+// GET /clients/:id -fetch one client by id, numeric index or company name
 router.get("/:id", async (req, res) => {
   try {
     const client = await resolveClientDocument(req.params.id);
@@ -82,7 +82,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST /clients — create a client
+// POST /clients -create a client
 router.post("/", async (req, res) => {
   try {
     const client = await Client.create(req.body);
@@ -92,7 +92,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT /clients/:id — update a client's top-level fields
+// PUT /clients/:id -update a client's top-level fields
 router.put("/:id", async (req, res) => {
   try {
     const existingClient = await resolveClientDocument(req.params.id);
@@ -109,7 +109,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE /clients/:id — delete a client and all its machines (superadmin only)
+// DELETE /clients/:id -delete a client and all its machines (superadmin only)
 router.delete("/:id", verifyToken, requireSuperAdmin, async (req, res) => {
   try {
     const existingClient = await resolveClientDocument(req.params.id);
@@ -123,7 +123,7 @@ router.delete("/:id", verifyToken, requireSuperAdmin, async (req, res) => {
   }
 });
 
-// POST /clients/:id/machines — add a machine to a client
+// POST /clients/:id/machines -add a machine to a client
 router.post("/:id/machines", async (req, res) => {
   try {
     const client = await resolveClientDocument(req.params.id);
@@ -142,7 +142,7 @@ router.post("/:id/machines", async (req, res) => {
   }
 });
 
-// PUT /clients/:id/machines/:machineId — update one machine's fields
+// PUT /clients/:id/machines/:machineId -update one machine's fields
 router.put("/:id/machines/:machineId", verifyToken, requireMachineEditor, async (req, res) => {
   try {
     const client = await resolveClientDocument(req.params.id);
@@ -168,7 +168,7 @@ router.put("/:id/machines/:machineId", verifyToken, requireMachineEditor, async 
   }
 });
 
-// DELETE /clients/:id/machines/:machineId — remove one machine (superadmin only)
+// DELETE /clients/:id/machines/:machineId -remove one machine (superadmin only)
 router.delete("/:id/machines/:machineId", verifyToken, requireSuperAdmin, async (req, res) => {
   try {
     const client = await resolveClientDocument(req.params.id);

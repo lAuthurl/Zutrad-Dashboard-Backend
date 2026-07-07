@@ -7,9 +7,9 @@ const router = express.Router();
 // ── small guard, same spirit as isPlainString in auth.js ─────────────
 const isPlainString = (val) => typeof val === "string" && val.trim().length > 0;
 
-// ── GET /calendar/events  — fetch all custom calendar events ────────────
+// ── GET /calendar/events  -fetch all custom calendar events ────────────
 // Any authenticated user can view the calendar (same pattern as
-// GET /auth/users — read access isn't role-gated, only writes are).
+// GET /auth/users -read access isn't role-gated, only writes are).
 router.get("/events", verifyToken, async (req, res) => {
   try {
     const events = await CalendarEvent.find();
@@ -19,7 +19,7 @@ router.get("/events", verifyToken, async (req, res) => {
   }
 });
 
-// ── POST /calendar/events  — create an event ─────────────────────────
+// ── POST /calendar/events  -create an event ─────────────────────────
 // Administrator or superadmin only.
 router.post("/events", verifyToken, requireAdmin, async (req, res) => {
   const { title, date, start, end, allDay, color } = req.body;
@@ -48,7 +48,7 @@ router.post("/events", verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-// ── PATCH /calendar/events/:id  — edit an event ───────────────────────
+// ── PATCH /calendar/events/:id  -edit an event ───────────────────────
 // Administrator or superadmin only. Only accepts fields a user can
 // change from the edit dialog / drag-and-drop; ownership doesn't matter,
 // role is what gates this (same as the permissions route in auth.js).
@@ -80,7 +80,7 @@ router.patch("/events/:id", verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-// ── DELETE /calendar/events/:id  — delete an event ────────────────────
+// ── DELETE /calendar/events/:id  -delete an event ────────────────────
 // Superadmin only.
 router.delete("/events/:id", verifyToken, requireSuperAdmin, async (req, res) => {
   try {

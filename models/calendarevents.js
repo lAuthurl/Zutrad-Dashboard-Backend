@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 // ── CalendarEvent ─────────────────────────────────────────────────────────
 // Stores custom calendar entries created from the Calendar page. Maintenance
-// events are NOT stored here — they're derived on the frontend from
+// events are NOT stored here -they're derived on the frontend from
 // mockDataMaintenance (see calendar.logic.js: buildInitialEvents), same as
 // today. This collection only backs the "custom" events a user adds, edits,
 // or deletes directly on the calendar.
@@ -20,7 +20,7 @@ const calendarEventSchema = new mongoose.Schema(
 
     color: { type: String },
 
-    // Who created it — useful for auditing who added what, though edit/delete
+    // Who created it -useful for auditing who added what, though edit/delete
     // permissions are role-based (see routes/calendar.js), not ownership-based.
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },

@@ -15,11 +15,11 @@ const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
-// ── upload directory — created at startup if missing ─────────────────────────
+// ── upload directory -created at startup if missing ─────────────────────────
 const UPLOAD_DIR = path.join(__dirname, "../../uploads/supply");
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-// ── multer — disk storage with unique filenames to avoid collisions ───────────
+// ── multer -disk storage with unique filenames to avoid collisions ───────────
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
   filename:    (_req,  file, cb) => {
@@ -43,7 +43,7 @@ const upload = multer({
 // ── handleUpload ───────────────────────────────────────────────────────────────
 // Wraps multer so that ANY upload error (MulterError, blocked file type, file
 // too large, etc.) is returned as a proper JSON 400 response instead of
-// triggering Express's default HTML error page — which would cause the frontend
+// triggering Express's default HTML error page -which would cause the frontend
 // to receive non-JSON and show "Server returned an unexpected response".
 const handleUpload = (req, res, next) => {
   upload.array("files", 20)(req, res, (err) => {
@@ -104,7 +104,7 @@ const resolveClientReference = async (clientId) => {
   throw new Error("Client not found.");
 };
 
-// ── GET /supply — list all supply log entries, newest first ──────────────────
+// ── GET /supply -list all supply log entries, newest first ──────────────────
 router.get("/", verifyToken, async (req, res) => {
   try {
     const rows = await populateSupply(Supply.find().sort({ createdAt: -1 }));
@@ -115,7 +115,7 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// ── GET /supply/files/:filename — download an attachment ─────────────────────
+// ── GET /supply/files/:filename -download an attachment ─────────────────────
 // MUST be registered before /:id routes so Express doesn't treat "files" as
 // an id parameter.
 // Users with store or supply permissions, plus admins/superadmins, can download.
@@ -147,7 +147,7 @@ router.get("/files/:filename", verifyToken, requireAnyPermission(["store", "supp
   }
 });
 
-// ── POST /supply — log a new supply entry with optional file attachments ──────
+// ── POST /supply -log a new supply entry with optional file attachments ──────
 // Requires "supply" permission (or superadmin).
 // Uses handleUpload (wraps multer) so any upload error returns JSON, not HTML.
 router.post(
@@ -228,7 +228,7 @@ router.post(
   }
 );
 
-// ── DELETE /supply/:id — remove a single entry and its files ─────────────────
+// ── DELETE /supply/:id -remove a single entry and its files ─────────────────
 // Superadmin-only.
 router.delete("/:id", verifyToken, requireSuperAdmin, async (req, res) => {
   try {
@@ -247,7 +247,7 @@ router.delete("/:id", verifyToken, requireSuperAdmin, async (req, res) => {
   }
 });
 
-// ── POST /supply/bulk-delete — remove multiple entries and their files ────────
+// ── POST /supply/bulk-delete -remove multiple entries and their files ────────
 // Superadmin-only.
 router.post("/bulk-delete", verifyToken, requireSuperAdmin, async (req, res) => {
   try {

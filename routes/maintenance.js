@@ -3,7 +3,7 @@ import MaintenanceLog from "../models/MaintenanceLog.js";
 import Client from "../models/Client.js";
 import { verifyToken, requireAdmin, requireSuperAdmin } from "../middleware/auth.js";
 const router = express.Router();
-// GET /maintenance — list all logs, newest first, with client/user details
+// GET /maintenance -list all logs, newest first, with client/user details
 // Any authenticated user can view the maintenance log list.
 router.get("/", verifyToken, async (req, res) => {
   try {
@@ -16,10 +16,10 @@ router.get("/", verifyToken, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-// POST /maintenance — log a new maintenance task
+// POST /maintenance -log a new maintenance task
 //
 // `user` is taken from the verified JWT (req.userId), never from the
-// request body — this matches what the frontend already sends (it
+// request body -this matches what the frontend already sends (it
 // deliberately omits userId, see maintenance.logic.js) and stops a
 // caller from logging a task as someone else.
 router.post("/", verifyToken, async (req, res) => {
@@ -45,11 +45,11 @@ router.post("/", verifyToken, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-// PATCH /maintenance/:id/done — mark a log as completed
+// PATCH /maintenance/:id/done -mark a log as completed
 //
 // Admin/superadmin only, matching userCanMarkDone on the frontend
 // (maintenance.logic.js). The frontend hides/disables this action for
-// other roles, but that's a UI convenience only — requireAdmin is what
+// other roles, but that's a UI convenience only -requireAdmin is what
 // actually enforces it, so the endpoint can't be called directly by an
 // unauthorized user to bypass the UI.
 router.patch("/:id/done", verifyToken, requireAdmin, async (req, res) => {
@@ -86,12 +86,12 @@ router.patch("/:id/done", verifyToken, requireAdmin, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-// DELETE /maintenance/:id — permanently delete a maintenance log
+// DELETE /maintenance/:id -permanently delete a maintenance log
 //
 // Superadmin only, matching userCanDelete on the frontend
 // (maintenance.logic.js), same restriction level as machine deletion
 // in clientMachine.logic.js. requireSuperAdmin is what actually
-// enforces this — the frontend hiding the button is a UI convenience
+// enforces this -the frontend hiding the button is a UI convenience
 // only, not the security boundary.
 router.delete("/:id", verifyToken, requireSuperAdmin, async (req, res) => {
   try {

@@ -83,7 +83,7 @@ const getReportId = (req) => {
 };
 
 // Matches a real 24-char hex Mongo ObjectId exactly. Deliberately NOT
-// mongoose.Types.ObjectId.isValid() — that function returns true for plain
+// mongoose.Types.ObjectId.isValid() -that function returns true for plain
 // numbers too (e.g. 1), since bson can pad a number into an ObjectId-shaped
 // buffer. That quirk was sending Client.findById(1) straight into a
 // "Cast to ObjectId failed" error instead of falling through to the
@@ -121,7 +121,7 @@ const resolveClientReference = async (clientId) => {
   throw new Error("Client not found.");
 };
 
-// ── GET /reports — list all reports, newest first ────────────────────────
+// ── GET /reports -list all reports, newest first ────────────────────────
 // Requires login (no longer publicly readable).
 router.get("/", verifyToken, async (req, res) => {
   try {
@@ -132,7 +132,7 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// ── POST /reports — file a new report ─────────────────────────────────────
+// ── POST /reports -file a new report ─────────────────────────────────────
 // Requires "reports" permission (or superadmin).
 // Accepts either JSON or multipart/form-data so the frontend can upload files.
 router.post(
@@ -174,7 +174,7 @@ router.post(
   }
 );
 
-// ── PATCH /reports/:id/approve — administrator or superadmin approves ─────
+// ── PATCH /reports/:id/approve -administrator or superadmin approves ─────
 router.patch("/:id/approve", verifyToken, requireAdmin, async (req, res) => {
   try {
     const reportId = getReportId(req);
@@ -192,7 +192,7 @@ router.patch("/:id/approve", verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-// ── PATCH /reports/:id/reject — administrator or superadmin rejects ───────
+// ── PATCH /reports/:id/reject -administrator or superadmin rejects ───────
 router.patch("/:id/reject", verifyToken, requireAdmin, async (req, res) => {
   try {
     const reportId = getReportId(req);
@@ -215,7 +215,7 @@ router.patch("/:id/reject", verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-// ── DELETE /reports/:id — superadmin-only ─────────────────────────────────
+// ── DELETE /reports/:id -superadmin-only ─────────────────────────────────
 router.delete("/:id", verifyToken, requireSuperAdmin, async (req, res) => {
   try {
     const reportId = getReportId(req);

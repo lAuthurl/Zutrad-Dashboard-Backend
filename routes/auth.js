@@ -7,13 +7,13 @@ import { verifyToken, requireAdmin, requireSuperAdmin } from "../middleware/auth
 const router = express.Router();
 
 // ── allowed roles a user can request for themselves at signup ───────
-// superadmin is deliberately excluded — that role can only be granted
+// superadmin is deliberately excluded -that role can only be granted
 // by an existing superadmin through a separate, protected action.
 const ALLOWED_SIGNUP_ROLES = ["engineer", "management", "administrator"];
 
 // All grantable pages. Used to give a freshly promoted administrator full
 // access by default. Must stay in sync with AVAILABLE_PAGES on the frontend
-// (userManagement.logic.js) — if a page is added there, add it here too.
+// (userManagement.logic.js) -if a page is added there, add it here too.
 const ALL_PAGES = ["store", "supply", "maintenance", "reports"];
 
 const getDefaultPermissions = (role) => {
@@ -33,8 +33,8 @@ const isPlainString = (val) => typeof val === "string" && val.trim().length > 0;
 // Only these keys can ever be written via PATCH /auth/settings. Mirrors
 // the `settings` sub-schema on the User model and the fields owned by
 // useSettingsPage on the frontend. Whitelisting (rather than trusting
-// req.body wholesale) stops arbitrary keys — or accidentally overwriting
-// role/permissions/passwordHash via a naive $set — from slipping through.
+// req.body wholesale) stops arbitrary keys -or accidentally overwriting
+// role/permissions/passwordHash via a naive $set -from slipping through.
 const SETTINGS_KEYS = [
   "notifMaintenance",
   "notifReports",
@@ -98,7 +98,7 @@ const clearPwAttempts = (userId) => pwAttempts.delete(userId);
 
 
 // ── POST /auth/signup ──────────────────────────────────────────────
-// Creates user with isApproved: false — admin approves from AdminPage
+// Creates user with isApproved: false -admin approves from AdminPage
 router.post("/signup", async (req, res) => {
   const { firstName, surname, email, role, password } = req.body;
 
@@ -203,9 +203,9 @@ router.get("/me", verifyToken, async (req, res) => {
 });
 
 
-// ── GET /auth/settings  — fetch the current user's own settings ──────
+// ── GET /auth/settings  -fetch the current user's own settings ──────
 // Any authenticated user. Falls back to schema defaults automatically
-// since `settings` is a defined sub-document — a user created before
+// since `settings` is a defined sub-document -a user created before
 // this field existed will still get sane defaults back, not undefined.
 router.get("/settings", verifyToken, async (req, res) => {
   try {
@@ -219,8 +219,8 @@ router.get("/settings", verifyToken, async (req, res) => {
 });
 
 
-// ── PATCH /auth/settings  — update the current user's own settings ───
-// Any authenticated user, own account only — there's no :id here on
+// ── PATCH /auth/settings  -update the current user's own settings ───
+// Any authenticated user, own account only -there's no :id here on
 // purpose, this route can never touch anyone else's settings. Only
 // whitelisted keys from SETTINGS_KEYS are ever written.
 router.patch("/settings", verifyToken, async (req, res) => {
@@ -251,7 +251,7 @@ router.patch("/settings", verifyToken, async (req, res) => {
 });
 
 
-// ── POST /auth/change-password  — change the current user's password ─
+// ── POST /auth/change-password  -change the current user's password ─
 // Any authenticated user, own account only. Requires the correct
 // current password before allowing a change. Rate-limited per user to
 // slow down anyone trying to brute-force a stolen/guessed session's
@@ -304,7 +304,7 @@ router.post("/change-password", verifyToken, async (req, res) => {
 });
 
 
-// ── GET /auth/pending  — fetch all unapproved users ──────────────────
+// ── GET /auth/pending  -fetch all unapproved users ──────────────────
 // Admin-only (administrator or superadmin).
 router.get("/pending", verifyToken, requireAdmin, async (req, res) => {
   try {
@@ -316,7 +316,7 @@ router.get("/pending", verifyToken, requireAdmin, async (req, res) => {
 });
 
 
-// ── GET /auth/users  — fetch all approved users ───────────────────────
+// ── GET /auth/users  -fetch all approved users ───────────────────────
 // Any authenticated user can load the approved users list.
 // Excludes pending signups (those come from /auth/pending) and never
 // returns the password hash.
@@ -330,7 +330,7 @@ router.get("/users", verifyToken, async (req, res) => {
 });
 
 
-// ── PATCH /auth/approve/:id  — approve a user ─────────────────────────
+// ── PATCH /auth/approve/:id  -approve a user ─────────────────────────
 // Admin-only (administrator or superadmin).
 router.patch("/approve/:id", verifyToken, requireAdmin, async (req, res) => {
   try {
@@ -356,7 +356,7 @@ router.patch("/approve/:id", verifyToken, requireAdmin, async (req, res) => {
 });
 
 
-// ── DELETE /auth/reject/:id  — reject and delete a signup request ────
+// ── DELETE /auth/reject/:id  -reject and delete a signup request ────
 // Admin-only (administrator or superadmin).
 router.delete("/reject/:id", verifyToken, requireAdmin, async (req, res) => {
   try {
@@ -368,17 +368,17 @@ router.delete("/reject/:id", verifyToken, requireAdmin, async (req, res) => {
 });
 
 
-// ── PATCH /auth/users/:id/permissions  — set a user's page permissions ──
+// ── PATCH /auth/users/:id/permissions  -set a user's page permissions ──
 // Admin-only (administrator or superadmin). Used by "Special Page Access"
 // on both the Admin and Super Admin pages. Replaces the full permissions
-// array rather than diffing add/remove — the frontend always sends the
+// array rather than diffing add/remove -the frontend always sends the
 // complete desired list, which keeps this route simple and avoids drift.
 //
-// Administrators DO carry an editable permissions list — they start with
+// Administrators DO carry an editable permissions list -they start with
 // every page on promotion (see /users/:id/role below) but a superadmin can
 // revoke individual pages from them without a full demotion. Superadmins
 // themselves have no permissions list at all and are never a valid target
-// here — there's no role above them to manage that exception.
+// here -there's no role above them to manage that exception.
 router.patch("/users/:id/permissions", verifyToken, requireAdmin, async (req, res) => {
   const { permissions } = req.body;
 
@@ -409,21 +409,21 @@ router.patch("/users/:id/permissions", verifyToken, requireAdmin, async (req, re
 });
 
 
-// ── PATCH /auth/users/:id/role  — promote or demote a user's role ───────
+// ── PATCH /auth/users/:id/role  -promote or demote a user's role ───────
 // Superadmin-only. Used by "Administrator Role Control" on the Super Admin
 // page, and by the promote-via-permission-picker shortcut there.
 //
 // Promoting to administrator grants every page in ALL_PAGES by default —
 // a superadmin can later trim individual pages via /users/:id/permissions
 // without a full demotion. Promoting to superadmin grants no permissions
-// list at all — superadmins get full access implicitly (see requireAdmin /
+// list at all -superadmins get full access implicitly (see requireAdmin /
 // requirePermission in middleware/auth.js), not through a stored list, so
 // there is nothing to populate. Demoting OUT of administrator (or between
 // engineer/receptionist) clears permissions to a clean empty slate, which
 // an admin or superadmin then re-grants explicitly.
 //
 // NOTE: promoting someone to "superadmin" here is currently a one-way
-// door through this UI/route — the "target is already superadmin" guard
+// door through this UI/route -the "target is already superadmin" guard
 // below blocks changing an existing superadmin's role at all, including
 // by another superadmin. If that should ever be reversible, this route
 // (and the matching guard in /users/:id/permissions) needs a deliberate
@@ -468,9 +468,9 @@ router.patch("/users/:id/role", verifyToken, requireSuperAdmin, async (req, res)
 });
 
 
-// ── DELETE /auth/users/:id  — superadmin deletes any approved user ───
+// ── DELETE /auth/users/:id  -superadmin deletes any approved user ───
 // Superadmin-only. Used by the All Users page. A superadmin can delete
-// anyone — including administrators — but never themselves through
+// anyone -including administrators -but never themselves through
 // this route (use account settings / a dedicated flow for that, since
 // self-deleting your only superadmin account would be unrecoverable).
 router.delete("/users/:id", verifyToken, requireSuperAdmin, async (req, res) => {

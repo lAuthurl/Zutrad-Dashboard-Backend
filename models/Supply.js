@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 // name:       original filename shown to the user (e.g. "invoice.pdf")
 // storedName: unique filename on disk (e.g. "1714000000000-123456789.pdf")
 //             present only on entries logged after file-upload was enabled.
-//             Legacy entries have name only — the download route checks for
+//             Legacy entries have name only -the download route checks for
 //             storedName and returns a clear error if it's missing.
 // mimetype:   MIME type reported by the browser (e.g. "application/pdf")
 // size:       file size in bytes

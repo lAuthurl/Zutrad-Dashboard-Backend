@@ -4,7 +4,7 @@ import { verifyToken, requirePermission, requireSuperAdmin } from "../middleware
 
 const router = express.Router();
 
-// ── GET /store — list all inventory items, newest first ────────────────
+// ── GET /store -list all inventory items, newest first ────────────────
 // Requires login (no longer publicly readable).
 router.get("/", verifyToken, async (req, res) => {
   try {
@@ -15,7 +15,7 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// ── POST /store — add a new part to inventory ───────────────────────────
+// ── POST /store -add a new part to inventory ───────────────────────────
 // Requires "store" permission (or superadmin).
 router.post("/", verifyToken, requirePermission("store"), async (req, res) => {
   try {
@@ -42,7 +42,7 @@ router.post("/", verifyToken, requirePermission("store"), async (req, res) => {
   }
 });
 
-// ── PATCH /store/:id/quantity — adjust quantity up/down ─────────────────
+// ── PATCH /store/:id/quantity -adjust quantity up/down ─────────────────
 // Body: { delta: number }. Quantity is clamped at 0.
 // Superadmin-only for manual adjustments.
 router.patch("/:id/quantity", verifyToken, requireSuperAdmin, async (req, res) => {
@@ -61,7 +61,7 @@ router.patch("/:id/quantity", verifyToken, requireSuperAdmin, async (req, res) =
   }
 });
 
-// ── PUT /store/:id — update a part's fields directly ─────────────────────
+// ── PUT /store/:id -update a part's fields directly ─────────────────────
 // Requires "store" permission (or superadmin).
 router.put("/:id", verifyToken, requirePermission("store"), async (req, res) => {
   try {
@@ -76,7 +76,7 @@ router.put("/:id", verifyToken, requirePermission("store"), async (req, res) => 
   }
 });
 
-// ── DELETE /store/:id — remove a part from inventory ──────────────────────
+// ── DELETE /store/:id -remove a part from inventory ──────────────────────
 // Superadmin-only.
 router.delete("/:id", verifyToken, requireSuperAdmin, async (req, res) => {
   try {
