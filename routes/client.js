@@ -173,9 +173,10 @@ router.delete("/:id/machines/:machineId", verifyToken, requireSuperAdmin, async 
   try {
     const client = await resolveClientDocument(req.params.id);
     if (!client) return res.status(404).json({ message: "Client not found" });
-    client.machines = client.machines.filter(
-      (m) => m._id.toString() !== req.params.machineId
-    );
+    const beforeCount = client.machines.length;
+    client.machines = client.machines.filter((m) => m._id.toString() !== req.params.machineId);
+    const afterCount = client.machines.length;
+    console.log(`Deleting machine ${req.params.machineId} from client ${client._id}. removed=${beforeCount - afterCount}`);
     await client.save();
     res.json(client);
   } catch (err) {
