@@ -9,7 +9,7 @@ const router = express.Router();
 // ── allowed roles a user can request for themselves at signup ───────
 // superadmin is deliberately excluded — that role can only be granted
 // by an existing superadmin through a separate, protected action.
-const ALLOWED_SIGNUP_ROLES = ["engineer", "receptionist", "administrator"];
+const ALLOWED_SIGNUP_ROLES = ["engineer", "management", "administrator"];
 
 // All grantable pages. Used to give a freshly promoted administrator full
 // access by default. Must stay in sync with AVAILABLE_PAGES on the frontend
@@ -18,7 +18,7 @@ const ALL_PAGES = ["store", "supply", "maintenance", "reports"];
 
 const getDefaultPermissions = (role) => {
   if (role === "engineer") return ["reports", "maintenance"];
-  if (role === "receptionist") return ["reports", "supply"];
+  if (role === "management") return ["reports", "supply"];
   if (role === "administrator") return [...ALL_PAGES];
   if (role === "superadmin") return [];
   return ["reports"];
@@ -431,7 +431,7 @@ router.patch("/users/:id/permissions", verifyToken, requireAdmin, async (req, re
 // system.
 router.patch("/users/:id/role", verifyToken, requireSuperAdmin, async (req, res) => {
   const { role } = req.body;
-  const ALLOWED_ROLES = ["engineer", "receptionist", "administrator", "superadmin"];
+  const ALLOWED_ROLES = ["engineer", "management", "administrator", "superadmin"];
 
   if (!isPlainString(role) || !ALLOWED_ROLES.includes(role)) {
     return res.status(400).json({ message: "Invalid role." });
