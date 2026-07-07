@@ -16,6 +16,14 @@ const ALLOWED_SIGNUP_ROLES = ["engineer", "receptionist", "administrator"];
 // (userManagement.logic.js) — if a page is added there, add it here too.
 const ALL_PAGES = ["store", "supply", "maintenance", "reports"];
 
+const getDefaultPermissions = (role) => {
+  if (role === "engineer") return ["reports", "maintenance"];
+  if (role === "receptionist") return ["reports", "supply"];
+  if (role === "administrator") return [...ALL_PAGES];
+  if (role === "superadmin") return [];
+  return ["reports"];
+};
+
 // ── small guard used by both /signup and /login ──────────────────────
 // Stops NoSQL operator injection, e.g. { "email": { "$gt": "" } },
 // which would otherwise be passed straight into a Mongoose query.
@@ -128,6 +136,7 @@ router.post("/signup", async (req, res) => {
       email: normalisedEmail,
       role,
       passwordHash,
+      permissions: getDefaultPermissions(role),
     });
 
     res.status(201).json({ message: "Request submitted. Await admin approval." });
@@ -328,7 +337,10 @@ router.patch("/approve/:id", verifyToken, requireAdmin, async (req, res) => {
     const target = await User.findById(req.params.id).select("role");
     if (!target) return res.status(404).json({ message: "User not found." });
 
-    const update = { isApproved: true };
+    const update = {
+      isApproved: true,
+      permissions: getDefaultPermissions(target.role),
+    };
     if (target.role === "administrator") update.permissions = ALL_PAGES;
 
     const user = await User.findByIdAndUpdate(
@@ -437,7 +449,11 @@ router.patch("/users/:id/role", verifyToken, requireSuperAdmin, async (req, res)
       return res.status(403).json({ message: "Super administrator roles cannot be changed from here." });
     }
 
-    const nextPermissions = role === "administrator" ? ALL_PAGES : [];
+    const nextPermissions = role === "administrator"
+      ? ALL_PAGES
+      : role === "superadmin"
+        ? []
+        : getDefaultPermissions(role);
 
     const user = await User.findByIdAndUpdate(
       req.params.id,

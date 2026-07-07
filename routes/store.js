@@ -44,8 +44,8 @@ router.post("/", verifyToken, requirePermission("store"), async (req, res) => {
 
 // ── PATCH /store/:id/quantity — adjust quantity up/down ─────────────────
 // Body: { delta: number }. Quantity is clamped at 0.
-// Requires "store" permission (or superadmin).
-router.patch("/:id/quantity", verifyToken, requirePermission("store"), async (req, res) => {
+// Superadmin-only for manual adjustments.
+router.patch("/:id/quantity", verifyToken, requireSuperAdmin, async (req, res) => {
   try {
     const { delta } = req.body;
     if (typeof delta !== "number") {

@@ -8,6 +8,8 @@ const maintenanceLogSchema = new mongoose.Schema(
       required: true,
       enum: ["Macsa ID", "Savema", "Sojet", "BestCode"],
     },
+    machineSerialNumber: { type: String, trim: true },
+    machineId: { type: String, trim: true },
     maintenanceDay: { type: Date, required: true },
     isDone: { type: Boolean, default: false },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

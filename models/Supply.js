@@ -21,6 +21,7 @@ const AttachmentSchema = new mongoose.Schema(
 const SupplySchema = new mongoose.Schema(
   {
     goodsSupplied: { type: String, required: true, trim: true },
+    serialNumber:  { type: String, required: true, trim: true },
     partNumber:    { type: String, required: true, trim: true },
     quantity:      { type: Number, required: true, min: 1 },
     supplyDate:    { type: Date,   required: true },
@@ -28,6 +29,11 @@ const SupplySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref:  "Client",
       required: true,
+    },
+    storeItem: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref:  "StoreItem",
+      default: null,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

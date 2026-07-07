@@ -7,6 +7,35 @@ const router = express.Router();
 
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+const canEditMachine = (req) => {
+  return req.userRole === "superadmin" || req.userRole === "administrator" || req.userPermissions?.includes("maintenance");
+};
+
+const requireMachineEditor = (req, res, next) => {
+  if (!canEditMachine(req)) {
+    return res.status(403).json({ message: "Access denied." });
+  }
+  next();
+};
+
+const findDuplicateMachineSerial = async (serialNumber, { excludeClientId, excludeMachineId } = {}) => {
+  const normalizedSerial = String(serialNumber || "").trim();
+  if (!normalizedSerial) return null;
+
+  const matchingClients = await Client.find({
+    "machines.serialNumber": { $regex: new RegExp(`^${escapeRegExp(normalizedSerial)}$`, "i") },
+  }).select("_id machines");
+
+  return matchingClients.find((client) =>
+    client._id.toString() !== excludeClientId &&
+    client.machines.some((machine) => {
+      const sameSerial = machine.serialNumber && machine.serialNumber.toLowerCase() === normalizedSerial.toLowerCase();
+      const sameMachine = excludeMachineId && machine._id && machine._id.toString() === excludeMachineId;
+      return sameSerial && !sameMachine;
+    })
+  );
+};
+
 const resolveClientDocument = async (input) => {
   if (input === undefined || input === null || input === "") return null;
 
@@ -99,6 +128,12 @@ router.post("/:id/machines", async (req, res) => {
   try {
     const client = await resolveClientDocument(req.params.id);
     if (!client) return res.status(404).json({ message: "Client not found" });
+
+    const duplicate = await findDuplicateMachineSerial(req.body?.serialNumber);
+    if (duplicate) {
+      return res.status(409).json({ message: "A machine with this serial number already exists." });
+    }
+
     client.machines.push(req.body);
     await client.save();
     res.status(201).json(client);
@@ -108,12 +143,23 @@ router.post("/:id/machines", async (req, res) => {
 });
 
 // PUT /clients/:id/machines/:machineId — update one machine's fields
-router.put("/:id/machines/:machineId", async (req, res) => {
+router.put("/:id/machines/:machineId", verifyToken, requireMachineEditor, async (req, res) => {
   try {
     const client = await resolveClientDocument(req.params.id);
     if (!client) return res.status(404).json({ message: "Client not found" });
     const machine = client.machines.id(req.params.machineId);
     if (!machine) return res.status(404).json({ message: "Machine not found" });
+
+    if (req.body?.serialNumber !== undefined) {
+      const duplicate = await findDuplicateMachineSerial(req.body.serialNumber, {
+        excludeClientId: client._id.toString(),
+        excludeMachineId: req.params.machineId,
+      });
+      if (duplicate) {
+        return res.status(409).json({ message: "A machine with this serial number already exists." });
+      }
+    }
+
     Object.assign(machine, req.body);
     await client.save();
     res.json(client);

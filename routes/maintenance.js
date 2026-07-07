@@ -1,5 +1,6 @@
 import express from "express";
 import MaintenanceLog from "../models/MaintenanceLog.js";
+import Client from "../models/Client.js";
 import { verifyToken, requireAdmin, requireSuperAdmin } from "../middleware/auth.js";
 const router = express.Router();
 // GET /maintenance — list all logs, newest first, with client/user details
@@ -23,13 +24,15 @@ router.get("/", verifyToken, async (req, res) => {
 // caller from logging a task as someone else.
 router.post("/", verifyToken, async (req, res) => {
   try {
-    const { message, machine, maintenanceDay, clientId } = req.body;
+    const { message, machine, maintenanceDay, clientId, machineSerialNumber, machineId } = req.body;
     if (!message || !machine || !maintenanceDay || !clientId) {
       return res.status(400).json({ message: "All fields are required." });
     }
     const log = await MaintenanceLog.create({
       message,
       machine,
+      machineSerialNumber: machineSerialNumber?.trim() || undefined,
+      machineId: machineId?.toString?.() || undefined,
       maintenanceDay,
       client: clientId,
       user: req.userId,
@@ -51,15 +54,34 @@ router.post("/", verifyToken, async (req, res) => {
 // unauthorized user to bypass the UI.
 router.patch("/:id/done", verifyToken, requireAdmin, async (req, res) => {
   try {
-    const log = await MaintenanceLog.findByIdAndUpdate(
-      req.params.id,
-      { isDone: true },
-      { new: true }
-    )
+    const log = await MaintenanceLog.findById(req.params.id);
+    if (!log) return res.status(404).json({ message: "Log not found" });
+
+    const completedAt = new Date();
+    log.isDone = true;
+    await log.save();
+
+    if (log.client) {
+      const client = await Client.findById(log.client);
+      if (client) {
+        const machine = log.machineId
+          ? client.machines.id(log.machineId)
+          : log.machineSerialNumber
+            ? client.machines.find((m) => String(m.serialNumber || "").trim().toLowerCase() === String(log.machineSerialNumber).trim().toLowerCase())
+            : client.machines.find((m) => m.machine === log.machine);
+
+        if (machine) {
+          machine.lastMaintenanceDate = completedAt;
+          await client.save();
+        }
+      }
+    }
+
+    const updated = await MaintenanceLog.findById(log._id)
       .populate("user", "firstName surname")
       .populate("client", "companyName");
-    if (!log) return res.status(404).json({ message: "Log not found" });
-    res.json(log);
+
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

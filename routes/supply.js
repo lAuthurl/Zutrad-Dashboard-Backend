@@ -5,8 +5,9 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import Supply from "../models/Supply.js";
+import StoreItem from "../models/StoreItem.js";
 import Client from "../models/Client.js";
-import { verifyToken, requirePermission, requireAdmin, requireSuperAdmin } from "../middleware/auth.js";
+import { verifyToken, requirePermission, requireAdmin, requireSuperAdmin, requireAnyPermission } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -72,7 +73,8 @@ const handleUpload = (req, res, next) => {
 const populateSupply = (query) =>
   query
     .populate("user",   "firstName surname")
-    .populate("client", "companyName");
+    .populate("client", "companyName")
+    .populate("storeItem", "machinePart partNumber serialNumber quantity");
 
 const resolveClientReference = async (clientId) => {
   if (clientId === undefined || clientId === null || clientId === "") {
@@ -116,8 +118,8 @@ router.get("/", verifyToken, async (req, res) => {
 // ── GET /supply/files/:filename — download an attachment ─────────────────────
 // MUST be registered before /:id routes so Express doesn't treat "files" as
 // an id parameter.
-// Admin / superadmin only.
-router.get("/files/:filename", verifyToken, requireAdmin, async (req, res) => {
+// Users with store or supply permissions, plus admins/superadmins, can download.
+router.get("/files/:filename", verifyToken, requireAnyPermission(["store", "supply"]), async (req, res) => {
   try {
     const safeFilename = path.basename(req.params.filename); // strip traversal
     const filePath     = path.join(UPLOAD_DIR, safeFilename);
@@ -155,13 +157,15 @@ router.post(
   handleUpload,
   async (req, res) => {
     try {
-      const { goodsSupplied, partNumber, quantity, supplyDate, clientId } = req.body;
+      const { goodsSupplied, serialNumber, partNumber, quantity, supplyDate, clientId, storeItemId } = req.body;
+      const qty = Number(quantity);
+      const normalizedSerial = String(serialNumber || "").trim();
 
-      if (!goodsSupplied || !partNumber || !quantity || !supplyDate || !clientId) {
+      if (!goodsSupplied || !normalizedSerial || !partNumber || !quantity || !supplyDate || !clientId) {
         (req.files || []).forEach((f) => fs.unlink(f.path, () => {}));
         return res.status(400).json({ message: "All fields are required." });
       }
-      if (Number(quantity) <= 0) {
+      if (!Number.isFinite(qty) || qty <= 0) {
         (req.files || []).forEach((f) => fs.unlink(f.path, () => {}));
         return res.status(400).json({ message: "Enter a valid quantity." });
       }
@@ -175,15 +179,43 @@ router.post(
 
       const clientReference = await resolveClientReference(clientId);
 
-      const entry = await Supply.create({
-        goodsSupplied,
-        partNumber,
-        quantity:    Number(quantity),
-        supplyDate,
-        client:      clientReference,
-        user:        req.userId,
-        attachments,
-      });
+      const storeItem = storeItemId
+        ? await StoreItem.findById(storeItemId)
+        : await StoreItem.findOne({
+            serialNumber: new RegExp(`^${normalizedSerial}$`, "i"),
+          });
+
+      if (!storeItem) {
+        throw new Error("No matching part was found in store for this serial number.");
+      }
+
+      const updatedItem = await StoreItem.findOneAndUpdate(
+        { _id: storeItem._id, quantity: { $gte: qty } },
+        { $inc: { quantity: -qty } },
+        { new: true }
+      );
+
+      if (!updatedItem) {
+        throw new Error(`Insufficient stock. Available quantity: ${storeItem.quantity}`);
+      }
+
+      let entry;
+      try {
+        entry = await Supply.create({
+          goodsSupplied,
+          serialNumber: normalizedSerial,
+          partNumber,
+          quantity: qty,
+          supplyDate,
+          client: clientReference,
+          storeItem: storeItem._id,
+          user: req.userId,
+          attachments,
+        });
+      } catch (err) {
+        await StoreItem.findByIdAndUpdate(storeItem._id, { $inc: { quantity: qty } });
+        throw err;
+      }
 
       const populated = await populateSupply(Supply.findById(entry._id));
       res.status(201).json(populated);

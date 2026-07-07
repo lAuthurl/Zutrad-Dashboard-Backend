@@ -60,6 +60,21 @@ export const requirePermission = (permission) => (req, res, next) => {
   next();
 };
 
+// ── requireAnyPermission ─────────────────────────────────────────────
+// Allows access when the authenticated user has any of the listed
+// permissions, or is a superadmin.
+export const requireAnyPermission = (permissions) => (req, res, next) => {
+  if (req.userRole === "superadmin") return next();
+
+  const list = Array.isArray(permissions) ? permissions : [permissions];
+  const hasAny = list.some((permission) => req.userPermissions?.includes(permission));
+  if (!hasAny) {
+    return res.status(403).json({ message: "Access denied." });
+  }
+
+  next();
+};
+
 // ── requireAdmin ────────────────────────────────────────────────────
 // Run AFTER verifyToken. Blocks anyone who isn't "administrator" or
 // "superadmin" — these are the actual role strings used across the
