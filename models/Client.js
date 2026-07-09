@@ -4,7 +4,7 @@ const MachineSchema = new mongoose.Schema({
   serialNumber: { type: String, required: true },
   machine: {
     type: String,
-    enum: ["Macsa ID", "Savema", "Sojet", "BestCode"],
+    enum: ["MACSA ID", "SAVEMA", "SOJET", "BESTCODE", "HITACHI", "EIDOS", "MARKEM IMARJE"],
     required: true,
   },
   lineInstalled: { type: Number },

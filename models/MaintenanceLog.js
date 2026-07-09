@@ -6,7 +6,7 @@ const maintenanceLogSchema = new mongoose.Schema(
     machine: {
       type: String,
       required: true,
-      enum: ["Macsa ID", "Savema", "Sojet", "BestCode"],
+      enum: ["MACSA ID", "SAVEMA", "SOJET", "BESTCODE", "HITACHI", "EIDOS", "MARKEM IMARJE"],
     },
     machineSerialNumber: { type: String, trim: true },
     machineId: { type: String, trim: true },

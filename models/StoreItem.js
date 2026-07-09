@@ -8,7 +8,7 @@ const storeItemSchema = new mongoose.Schema(
     machine: {
       type: String,
       required: true,
-      enum: ["Macsa ID", "Savema", "Sojet", "BestCode"],
+      enum: ["MACSA ID", "SAVEMA", "SOJET", "BESTCODE", "HITACHI", "EIDOS", "MARKEM IMARJE"],
     },
     quantity: { type: Number, required: true, min: 0, default: 0 },
   },
